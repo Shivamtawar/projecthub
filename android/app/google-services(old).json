@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "812047731231",
+    "project_id": "projecthu-shop",
+    "storage_bucket": "projecthu-shop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:812047731231:android:1eef5f19208e209eeda32a",
+        "android_client_info": {
+          "package_name": "com.lsoys.projecthub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGu-IqmaAGi8hnnhNs4F0XqVdX5fkdUeU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

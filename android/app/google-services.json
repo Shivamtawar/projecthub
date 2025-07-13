@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "812047731231",
+    "project_id": "projecthu-shop",
+    "storage_bucket": "projecthu-shop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:812047731231:android:1eef5f19208e209eeda32a",
+        "android_client_info": {
+          "package_name": "com.lsoys.projecthub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "812047731231-46eaiqmp027v0tm0lvr2246janj19e7p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lsoys.projecthub",
+            "certificate_hash": "973e1742def5afe2a2ec3d3d28f50cbbd6ff087a"
+          }
+        },
+        {
+          "client_id": "812047731231-11rgab3njfmjv0h0hnck4ashtmc8um76.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGu-IqmaAGi8hnnhNs4F0XqVdX5fkdUeU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "812047731231-11rgab3njfmjv0h0hnck4ashtmc8um76.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

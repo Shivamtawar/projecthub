@@ -1,0 +1,188 @@
+# user table
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_name VARCHAR(100) NOT NULL,
+    user_password VARCHAR(255) NOT NULL,
+    user_description TEXT,
+    user_contact VARCHAR(20) UNIQUE DEFAULT NULL,
+    user_email VARCHAR(255) UNIQUE DEFAULT NULL,
+    role VARCHAR(50) NOT NULL,
+    wallet_money DECIMAL(10, 2) DEFAULT 0.00,
+    reference_code VARCHAR(50),
+    profile_photo VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+# creation table
+
+CREATE TABLE creations (
+    creation_id INT AUTO_INCREMENT PRIMARY KEY,
+    creation_title VARCHAR(255) NOT NULL,
+    creation_description TEXT NOT NULL,
+    creation_price DECIMAL(10, 2) NOT NULL,
+    creation_thumbnail VARCHAR(255) NOT NULL,
+    creation_file VARCHAR(255) NOT NULL,
+    category_id INT NOT NULL,
+    keyword TEXT DEFAULT NULL,
+    creation_other_images TEXT DEFAULT NULL,
+    total_copy_sell INT DEFAULT 0,
+    user_id INT,
+    createtime DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('underreview', 'publish') DEFAULT 'underreview',
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+ALTER TABLE creations 
+ADD COLUMN youtube_link TEXT NULL;
+
+
+
+
+# rating table
+
+CREATE TABLE ratings (
+    rating_id INT AUTO_INCREMENT PRIMARY KEY,
+    creation_id INT NOT NULL,
+    user_id INT NOT NULL,
+    rating DECIMAL(3, 2) NOT NULL CHECK (rating >= 0 AND rating <= 5),
+    comment TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (creation_id) REFERENCES creations(creation_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+# categories table
+
+CREATE TABLE categories (
+    category_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL,
+    category_description TEXT,
+    keywords TEXT,
+    platform_fee_id INT,
+    gst INT,
+    image varchar(255),
+    FOREIGN KEY (platform_fee_id) REFERENCES platform_fees(fee_id),
+    FOREIGN KEY (gst) REFERENCES gst_rates(gst_id)
+);
+
+
+CREATE TABLE carditems (
+    carditem_id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each card item
+    user_id INT NOT NULL,  -- Foreign key to link the card item with the user
+    creation_id INT NOT NULL,  -- Foreign key to the creation or product added to the cart
+    added_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp when the item was added
+    FOREIGN KEY (user_id) REFERENCES users(user_id),  -- Assuming you have a users table
+    FOREIGN KEY (creation_id) REFERENCES creations(creation_id)  -- Assuming you have a creations table
+);
+ALTER TABLE carditems
+ADD COLUMN status TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 for active, 0 for removed';
+
+
+CREATE TABLE gst_rates (
+    gst_id INT AUTO_INCREMENT PRIMARY KEY,
+    gst_percentage DECIMAL(5,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE platform_fees (
+    fee_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fee_percentage DECIMAL(5,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+);
+
+
+
+CREATE TABLE payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    razorpay_payment_id VARCHAR(255) NOT NULL,
+    payment_amount DECIMAL(10, 2) NOT NULL,
+    gst_amount DECIMAL(10, 2) DEFAULT NULL,
+    platform_fee DECIMAL(10, 2) DEFAULT NULL,
+    payment_method VARCHAR(50), -- e.g., 'credit_card', 'debit_card', 'upi', etc.
+    currency VARCHAR(10) DEFAULT 'INR', -- Currency used for payment
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    payment_gateway_fee DECIMAL(10, 2) DEFAULT NULL -- Fee charged by Razorpay (if applicable)
+);
+
+
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL, -- Reference to the user placing the order
+    payment_id INT DEFAULT NULL, -- Reference to the payment made for this order
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Date of order creation
+    FOREIGN KEY (payment_id) REFERENCES payments(payment_id) ON DELETE SET NULL -- Relationship to payments table
+);
+
+
+CREATE TABLE order_details (
+    order_detail_id INT AUTO_INCREMENT PRIMARY KEY, -- Unique ID for each order detail
+    order_id INT DEFAULT NULL, -- Foreign key to the orders table
+    creation_id INT DEFAULT NULL, -- ID of the creation/product
+    price DECIMAL(10,2) NOT NULL, -- Price of the creation/product
+    gst_amount DECIMAL(10,2) DEFAULT NULL, -- GST amount for the item
+    platform_fee DECIMAL(10,2) DEFAULT NULL, -- Platform fee for the item
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE -- Foreign key relation with orders
+);
+
+
+CREATE TABLE bank_accounts (
+    account_id INT AUTO_INCREMENT PRIMARY KEY,         -- Unique identifier for each bank account
+    user_id INT NOT NULL,                              -- Links the account to a user
+    account_holder_name VARCHAR(100) DEFAULT NULL,     -- Optional account holder name
+    bank_name VARCHAR(100) NOT NULL,                  -- Name of the bank
+    account_number VARCHAR(20) NOT NULL UNIQUE,       -- Unique account number
+    ifsc_code VARCHAR(11) NOT NULL,                   -- IFSC code of the bank branch
+    is_primary BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    -- When the record was created
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Last updated timestamp
+
+);
+CREATE TABLE withdrawals (
+    withdrawal_id INT AUTO_INCREMENT PRIMARY KEY,          -- Unique withdrawal ID
+    user_id INT NOT NULL,                                  -- User ID associated with the withdrawal
+    account_id INT NOT NULL,                               -- Bank account from which the money is withdrawn
+    amount DECIMAL(10,2) NOT NULL,                         -- Withdrawal amount
+    withdrawal_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,   -- Date and time of the withdrawal
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending', -- Status of the withdrawal
+    FOREIGN KEY (account_id) REFERENCES bank_accounts(account_id) ON DELETE CASCADE, -- Foreign key to bank_accounts
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE -- Foreign key to users table
+);
+
+CREATE TABLE creation_likes (
+    like_id INT AUTO_INCREMENT PRIMARY KEY,
+    creation_id INT NOT NULL,
+    user_id INT NOT NULL,
+    liked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (creation_id) REFERENCES creations(creation_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+CREATE TABLE creation_comments (
+    comment_id INT AUTO_INCREMENT PRIMARY KEY,
+    creation_id INT NOT NULL,
+    user_id INT NOT NULL,
+    comment_text TEXT NOT NULL,
+    commented_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (creation_id) REFERENCES creations(creation_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+CREATE TABLE creation_shares (
+    share_id INT AUTO_INCREMENT PRIMARY KEY,
+    creation_id INT NOT NULL,
+    user_id INT NOT NULL,
+    shared_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    share_platform ENUM('facebook', 'twitter', 'instagram', 'whatsapp', 'other') NOT NULL,
+    FOREIGN KEY (creation_id) REFERENCES creations(creation_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
